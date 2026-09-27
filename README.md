@@ -11,7 +11,8 @@ ATLAS is an interactive city explorer for comparing the character of cities thro
 - Preference matching across ten city attributes.
 - Searchable map view powered by MapLibre GL.
 - Responsive behavior for desktop and mobile, including reduced-motion support.
-- Deployable as a Vite/Vinext application with an optional Cloudflare Worker and D1 integration.
+- Shareable URLs for every view (`/city/tokyo`, `/explore?region=Europe`, `/compare`, …) with a proper 404 for unknown pages.
+- Deployable as a Vite/Vinext application on a Cloudflare Worker.
 
 ## Stack
 
@@ -21,7 +22,7 @@ ATLAS is an interactive city explorer for comparing the character of cities thro
 - Framer Motion
 - MapLibre GL
 - Tailwind CSS 4
-- Cloudflare Workers and optional D1/Drizzle support
+- Cloudflare Workers
 
 ## Run locally
 
@@ -47,22 +48,25 @@ npm run lint
 npm test
 ```
 
-`npm test` builds the deployable artifact and checks that the worker returns the expected rendered HTML and metadata.
+`npm test` runs the scoring unit tests, then builds the deployable artifact and checks that the worker returns the expected rendered HTML and metadata. `npm run test:unit` runs only the fast unit tests.
 
 ## Project structure
 
 ```text
-app/       UI, city data and map components
-public/    Favicon, social preview and static assets
-worker/    Cloudflare Worker entry point
-build/     Build and artifact packaging helpers
-tests/     Rendered HTML smoke test
-db/        Optional D1/Drizzle database layer
+app/         Routes (App Router): home, city/[id], explore, compare, discover, favorites
+components/  Page and UI components, including the map and the DNA backdrop
+lib/         City data, pure scoring logic and safe localStorage helpers
+public/      Favicon, social preview and static assets
+worker/      Cloudflare Worker entry point
+build/       Build and artifact packaging helpers
+tests/       Scoring unit tests and rendered HTML smoke test
 ```
 
-The city dataset lives in [`app/cities.ts`](app/cities.ts). Each timeline entry links to the source used for the corresponding fact. Population, temperature and score values are curated product data for the experience, not a live data feed.
+The city dataset lives in [`lib/cities.ts`](lib/cities.ts). Each timeline entry links to the source used for the corresponding fact. Population, average temperature and score values are curated product data for the experience, not a live data feed. Matching and ranking rules live in [`lib/scoring.ts`](lib/scoring.ts).
 
-Images are loaded from Unsplash URLs at runtime, so the preview and some city cards require network access.
+Images are loaded from Unsplash URLs at runtime, sized per layout through `imageAt()`, so the preview and some city cards require network access.
+
+Saved cities and match preferences are stored in the visitor's browser. If storage is unavailable (for example in some private browsing modes), they keep working for the current visit.
 
 ## Deployment
 
@@ -72,7 +76,7 @@ The project includes the configuration and scripts needed for the optional Sites
 npm run build
 ```
 
-The build validates the generated artifact before it is ready to serve. Database bindings are optional; the application can run without D1 configured.
+The build validates the generated artifact before it is ready to serve. Set `SITE_URL` (for example `https://atlas.example.com`) to use a fixed canonical URL for social preview images; otherwise the request host is used.
 
 ## License
 

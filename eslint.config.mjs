@@ -5,6 +5,11 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    // City photos are sized by Unsplash's CDN (lib/cities.ts imageAt), and the
+    // Worker has no next/image optimizer, so plain <img> is intentional.
+    rules: { "@next/next/no-img-element": "off" },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
