@@ -44,7 +44,10 @@ export type City = {
 };
 
 const img = (id: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1800&q=85`;
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&q=80`;
+
+/** Unsplash resizes on its CDN, so request only the width a layout needs. */
+export const imageAt = (url: string, width: number) => `${url}&w=${width}`;
 
 const source = (
   time: string,
@@ -408,4 +411,15 @@ export const dnaLabels: Record<keyof DNA, string> = {
   density: "Density",
 };
 
-export const getCity = (id: string) => cities.find((c) => c.id === id) || cities[0];
+export const dnaKeys = Object.keys(dnaLabels) as (keyof DNA)[];
+
+export const regions = [
+  "Asia",
+  "Europe",
+  "South America",
+  "North America",
+  "Oceania",
+].filter((region) => cities.some((c) => c.region === region));
+
+export const getCity = (id: string): City | undefined =>
+  cities.find((c) => c.id === id);
